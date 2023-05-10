@@ -13,11 +13,10 @@ import lombok.NoArgsConstructor;
 @Getter
 public class RequestForm {
 
-//    @Id @GeneratedValue
-//    @Column(name = "requst_form_id")
-//    private Long id;
+    @Id @GeneratedValue
+    @Column(name = "requst_form_id")
+    private Long id;
 
-    @Id
     private String request;
 
     private String response;
