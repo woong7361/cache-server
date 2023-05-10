@@ -1,9 +1,9 @@
 spring:
   datasource:
-    username: root
+    username: user
     password: 1234
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/cache
+    url: jdbc:mysql://localhost:8888/cache
 
   jpa:
     hibernate:
@@ -13,10 +13,17 @@ spring:
         show_sql: true
         format_sql: true
 
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+
 logging:
   level:
     org:
       hibernate:
         SQL: debug
         type.descriptor.sql: trace
+#    root: debug
+
 
