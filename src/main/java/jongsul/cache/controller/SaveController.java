@@ -12,16 +12,20 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 @Slf4j
 public class SaveController {
 
     private final RequestRepository requestRepository;
     private final RequestCacheRepository requestCacheRepository;
 
+    @Transactional
     @PostMapping("/api/save")
     public void saveInquire(@RequestBody InquireForm inquireForm) {
         RequestForm form = RequestForm.createForm(inquireForm.getRequest(), inquireForm.getResponse());
@@ -32,25 +36,28 @@ public class SaveController {
         requestCacheRepository.save(requestCache);
     }
 
-    @Transactional
+    @GetMapping("/api/findall")
+    public responseForm findAll() {
+        List<String> all = requestRepository.findAll().stream().map(a -> a.getRequest()).toList();
+        responseForm responseForm = new responseForm(all);
+        return responseForm;
+    }
+
     @GetMapping("/api/find")
     public String find(@RequestBody findForm findForm) {
-        Optional<RequestCache> cacheData = requestCacheRepository.findById(findForm.getRequest());
-        if (cacheData.isPresent()) {
-            return cacheData.get().getResponse();
+        Optional<RequestCache> cache = requestCacheRepository.findById(findForm.getRequest());
+        if (cache.isPresent()) {
+            return cache.get().getResponse();
         }
-
-        Optional<RequestForm> data = requestRepository.findByRequest(findForm.getRequest());
-        if (data.isPresent()) {
-
-            RequestCache requestCache =
-                    new RequestCache(data.get().getRequest(), data.get().getResponse(), 50000L);
-            requestCacheRepository.save(requestCache);
-            return data.get().getResponse();
+        Optional<RequestForm> result = requestRepository.findByRequest(findForm.getRequest());
+        if (result.isPresent()) {
+            return result.get().getRequest();
         }
 
         return "none";
     }
+
+
 
     @NoArgsConstructor
     @AllArgsConstructor
@@ -66,5 +73,12 @@ public class SaveController {
     @Getter
     private static class findForm {
         private String request;
+    }
+
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Getter
+    private static class responseForm {
+        private List<String> responses;
     }
 }
